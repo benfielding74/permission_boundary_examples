@@ -1,0 +1,136 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowCreateRoleWithBoundedContextAndPermissionBoundary",
+      "Effect": "Allow",
+      "Action": "iam:CreateRole",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "iam:RequestedResourceTags/Bounded-Context": "${aws:PrincipalTag/Bounded-Context}",
+          "iam:Path": "/example_bounded_context/",
+          "iam:PermissionsBoundary": "${aws:PermissionsBoundary}"
+        }
+      }
+    },
+    {
+      "Sid": "AllowCreatePolicyWithBoundedContext",
+      "Effect": "Allow",
+      "Action": "iam:CreatePolicy",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PermissionsBoundary": "${aws:PermissionsBoundary}"
+        }
+      }
+    },
+    {
+      "Sid": "AllowAttachDetachPolicyWithBoundedContext",
+      "Effect": "Allow",
+      "Action": ["iam:AttachRolePolicy", "iam:DetachRolePolicy"],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PermissionsBoundary": "${aws:PermissionsBoundary}"
+        }
+      }
+    },
+    {
+      "Sid": "AllowPassRole",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PermissionsBoundary": "${aws:PermissionsBoundary}"
+        }
+      }
+    },
+    {
+      "Sid": "DenyCreateRoleWithoutBoundedContextOrPermissionBoundary",
+      "Effect": "Deny",
+      "Action": "iam:CreateRole",
+      "Resource": "*",
+      "Condition": {
+        "ForAllValues:StringNotEqualsIfExists": {
+          "aws:RequestTag/Bounded-Context": "${aws:PrincipalTag/Bounded-Context}",
+          "iam:PermissionsBoundary": "${aws:PermissionsBoundary}"
+        }
+      }
+    },
+    {
+      "Sid": "DenyCreateRoleWithInvalidPath",
+      "Effect": "Deny",
+      "Action": "iam:CreateRole",
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "iam:Path": "/example_bounded_context/"
+        }
+      }
+    },
+    {
+      "Sid": "DenyCreatePolicyWithoutPermissionBoundary",
+      "Effect": "Deny",
+      "Action": "iam:CreatePolicy",
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "iam:PermissionsBoundary": "${aws:PermissionsBoundary}"
+        }
+      }
+    },
+    {
+      "Sid": "DenyAttachDetachPolicyWithoutPermissionBoundary",
+      "Effect": "Deny",
+      "Action": ["iam:AttachRolePolicy", "iam:DetachRolePolicy"],
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "iam:PermissionsBoundary": "${aws:PermissionsBoundary}"
+        }
+      }
+    },
+    {
+      "Sid": "DenyModifyingPermissionBoundary",
+      "Effect": "Deny",
+      "Action": [
+        "iam:PutRolePermissionsBoundary",
+        "iam:DeleteRolePermissionsBoundary"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AllowTaggingBoundedContext",
+      "Effect": "Allow",
+      "Action": "iam:TagRole",
+      "Resource": "*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": ["Bounded-Context"]
+        }
+      }
+    },
+    {
+      "Sid": "DenyUntaggingBoundedContext",
+      "Effect": "Deny",
+      "Action": "iam:UntagRole",
+      "Resource": "*",
+      "Condition": {
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": ["Bounded-Context"]
+        }
+      }
+    },
+    {
+      "Sid": "DenyRemovingTagsFromResources",
+      "Effect": "Deny",
+      "Action": [
+        "tag:UntagResource",
+        "resourcegroupstaggingapi:UntagResources"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
